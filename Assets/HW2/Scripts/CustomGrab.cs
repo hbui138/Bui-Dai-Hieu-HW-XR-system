@@ -18,16 +18,21 @@ public class CustomGrab : MonoBehaviour
         action.action.Enable();
 
         // Find the other hand
-        foreach(CustomGrab c in transform.parent.GetComponentsInChildren<CustomGrab>())
+        foreach (CustomGrab c in transform.parent.GetComponentsInChildren<CustomGrab>())
         {
             if (c != this)
                 otherHand = c;
         }
     }
 
+    // Declare variables to store previous position and rotation
+    private Vector3 previousPosition;
+    private Quaternion previousRotation;
+
     void Update()
     {
         grabbing = action.action.IsPressed();
+
         if (grabbing)
         {
             // Grab nearby object or the object in the other hand
@@ -36,18 +41,28 @@ public class CustomGrab : MonoBehaviour
 
             if (grabbedObject)
             {
-                // Change these to add the delta position and rotation instead
-                // Save the position and rotation at the end of Update function, so you can compare previous pos/rot to current here
-                grabbedObject.position = transform.position;
-                grabbedObject.rotation = transform.rotation;
+                // Calculate delta position and rotation
+                Vector3 deltaPosition = transform.position - previousPosition;
+                Quaternion deltaRotation = transform.rotation * Quaternion.Inverse(previousRotation);
+
+                // Update grabbed object based on delta position and rotation
+                grabbedObject.position += deltaPosition;
+                grabbedObject.rotation = deltaRotation * grabbedObject.rotation;
+
+                // Save current position and rotation for the next frame
+                previousPosition = transform.position;
+                previousRotation = transform.rotation;
             }
         }
         // If let go of button, release object
         else if (grabbedObject)
             grabbedObject = null;
 
-        // Should save the current position and rotation here
+        // Save the current position and rotation at the end of Update function
+        previousPosition = transform.position;
+        previousRotation = transform.rotation;
     }
+
 
     private void OnTriggerEnter(Collider other)
     {
@@ -58,14 +73,14 @@ public class CustomGrab : MonoBehaviour
         // Make sure gravity is disabled though, or your controllers will (virtually) fall to the ground
 
         Transform t = other.transform;
-        if(t && t.tag.ToLower()=="grabbable")
+        if (t && t.tag.ToLower() == "grabbable")
             nearObjects.Add(t);
     }
 
     private void OnTriggerExit(Collider other)
     {
         Transform t = other.transform;
-        if( t && t.tag.ToLower()=="grabbable")
+        if (t && t.tag.ToLower() == "grabbable")
             nearObjects.Remove(t);
     }
 }
