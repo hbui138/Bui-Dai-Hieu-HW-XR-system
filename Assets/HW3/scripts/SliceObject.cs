@@ -70,45 +70,7 @@ public class SliceObject : MonoBehaviour
         MeshCollider collider = slicedObject.AddComponent<MeshCollider>();
         collider.convex = true;
 
-        // Add fading effect
-        Renderer renderer = slicedObject.GetComponent<Renderer>();
-        if (renderer != null && renderer.material != null)
-        {
-            StartCoroutine(FadeOutMaterial(renderer.material));
-        }
-    }
-
-    private IEnumerator FadeOutMaterial(Material material)
-    {
-        // Start fading from current alpha value
-        Color startColor = material.color;
-        float startAlpha = startColor.a;
-        
-        // Target alpha value
-        float targetAlpha = 0f;
-
-        // Duration of the fading effect
-        float fadeDuration = 2f;
-        
-        // Time elapsed
-        float elapsedTime = 0f;
-
-        while (elapsedTime < fadeDuration)
-        {
-            // Interpolate alpha value over time
-            float alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / fadeDuration);
-            
-            // Update the material's color with the new alpha value
-            material.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
-
-            // Wait for the next frame
-            yield return null;
-
-            // Update elapsed time
-            elapsedTime += Time.deltaTime;
-        }
-
-        // Ensure the material is completely transparent
-        material.color = new Color(startColor.r, startColor.g, startColor.b, targetAlpha);
+        // Destroy the sliced object after 3 seconds
+        Destroy(slicedObject, 3f);
     }
 }
