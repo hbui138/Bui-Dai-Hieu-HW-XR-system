@@ -45,6 +45,28 @@ public class Spawner : MonoBehaviour
 
         enemy.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
 
+        SkinnedMeshRenderer skinnedRenderer = enemy.GetComponent<SkinnedMeshRenderer>();
+        MeshRenderer meshRenderer = enemy.GetComponent<MeshRenderer>();
+
+        if (skinnedRenderer != null)
+        {
+            skinnedRenderer.enabled = true;
+            if (meshRenderer != null)
+            {
+                meshRenderer.enabled = false;
+            }
+            else
+            {
+                meshRenderer = enemy.AddComponent<MeshRenderer>(); // Adding MeshRenderer if not present
+                meshRenderer.enabled = false;
+                meshRenderer.material = new Material(skinnedRenderer.material);
+            }
+        }
+        else
+        {
+            Debug.LogError("SkinnedMeshRenderer component not found on the enemy GameObject.");
+        }
+
         Transform houseTransform = GameObject.FindGameObjectWithTag("House").transform;
 
         // Add EnemyMovement script to the spawned entity
@@ -68,20 +90,12 @@ public class Spawner : MonoBehaviour
             navMeshAgent.speed = 1f; 
         }
 
-        // Add Rigidbody component and adjust mass
-        Rigidbody fruitRigidbody = enemy.AddComponent<Rigidbody>();
-        MeshCollider fruitCollider = enemy.AddComponent<MeshCollider>();
 
-        if (fruitRigidbody != null)
-        {
-            fruitRigidbody.useGravity = true;
-            fruitRigidbody.mass = enemyMass; // Adjust mass
-            fruitRigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous; // Set collision detection to Continuous
-        }
+        MeshCollider enemyCollider = enemy.AddComponent<MeshCollider>();
 
-        if (fruitCollider != null)
+        if (enemyCollider != null)
         {
-            fruitCollider.convex = true;
+            enemyCollider.convex = true;
         }
     }
 }
